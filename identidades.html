@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cultura y Simulacro | Identidades</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="noise">
+  <canvas id="particle-canvas"></canvas><div class="cursor-glow"></div>
+  <header class="topbar"><div class="topbar-inner"><div class="brand">Cultura<span>.Simulacro</span></div><nav class="nav"><a href="index.html">Inicio</a><a href="login.html">Login</a><a href="teoria.html">Teoria</a><a href="identidades.html">Identidades</a><a href="memorias.html">Memorias</a><a href="experimento.html">Experimento</a><a href="resultados.html">Resultados</a><a href="reflexion.html">Reflexion</a><a href="creditos.html">Creditos</a></nav></div></header>
+  <main class="wrap">
+    <section class="hero">
+      <span class="kicker">Propuesta 3</span>
+      <h1>Performar lo real</h1>
+      <p class="subtitle">Dos comunicadoras digitales publican los mismos temas. Cambian solo la estética, la imagen y la recepción social. El experimento mide cómo la apariencia altera percepción, credibilidad y engagement.</p>
+    </section>
+    <section class="grid two">
+      <article class="profile card generated-profile" data-profile-type="modelo">
+        <div class="profile-head">
+          <div class="profile-meta">
+            <div class="avatar-wrap"><img class="avatar" alt="Avatar generado de perfil modelo"></div>
+            <div>
+              <h3>Laura Cepeda</h3>
+              <p class="muted" data-profile-handle="modelo">@laura.cepeda · comunicadora digital / influencer</p>
+              <div class="stats"><span data-followers-text="modelo">48.2k seguidores</span><span>88 publicaciones</span><span>12k comentarios promedio</span></div>
+              <button class="btn ghost follow-btn" type="button" data-follow-profile="modelo">Seguir perfil</button>
+            </div>
+          </div>
+        </div>
+        <div class="posts generated-posts">
+        </div>
+      </article>
+      <article class="profile card generated-profile" data-profile-type="feminista">
+        <div class="profile-head">
+          <div class="profile-meta">
+            <div class="avatar-wrap"><img class="avatar" alt="Avatar generado de perfil feminista"></div>
+            <div>
+              <h3>Kimberly Loaiza</h3>
+              <p class="muted" data-profile-handle="feminista">@kimberly.loaiza · comunicadora feminista</p>
+              <div class="stats"><span data-followers-text="feminista">3.2k seguidores</span><span>312 publicaciones</span><span>400 comentarios promedio</span></div>
+              <button class="btn ghost follow-btn" type="button" data-follow-profile="feminista">Seguir perfil</button>
+            </div>
+          </div>
+        </div>
+        <div class="posts generated-posts">
+        </div>
+      </article>
+    </section>
+    <section class="vote-panel">
+      <p><strong>Votacion rapida:</strong> ¿Qué comunicadora te parece mas real?</p>
+      <div class="option-row">
+        <button class="btn" data-vote="laura">Laura Cepeda</button>
+        <button class="btn ghost" data-vote="kimberly">Kimberly Loaiza</button>
+      </div>
+      <p id="vote-result" class="muted hidden" style="margin-top:10px"></p>
+    </section>
+  </main>
+  <div id="post-modal" class="ig-modal hidden">
+    <div class="ig-modal-card">
+      <button id="close-post-modal" class="btn ghost" type="button">Cerrar</button>
+      <div class="ig-modal-grid">
+        <img id="modal-post-image" alt="Post ampliado">
+        <div>
+          <h3 id="modal-post-title"></h3>
+          <p id="modal-post-likes" class="muted"></p>
+          <div class="option-row">
+            <button id="modal-like-btn" class="btn ghost" type="button">Like</button>
+            <button id="modal-prev" class="btn ghost" type="button">Anterior</button>
+            <button id="modal-next" class="btn ghost" type="button">Siguiente</button>
+          </div>
+          <div id="modal-post-comments" class="ig-comments"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

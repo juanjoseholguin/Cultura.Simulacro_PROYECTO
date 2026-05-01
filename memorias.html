@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cultura y Simulacro | Memorias</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="noise">
+  <canvas id="particle-canvas"></canvas><div class="cursor-glow"></div>
+  <header class="topbar"><div class="topbar-inner"><div class="brand">Cultura<span>.Simulacro</span></div><nav class="nav"><a href="index.html">Inicio</a><a href="login.html">Login</a><a href="teoria.html">Teoria</a><a href="identidades.html">Identidades</a><a href="memorias.html">Memorias</a><a href="experimento.html">Experimento</a><a href="resultados.html">Resultados</a><a href="reflexion.html">Reflexion</a><a href="creditos.html">Creditos</a></nav></div></header>
+  <main class="wrap">
+    <section class="hero">
+      <span class="kicker">Propuesta 4</span>
+      <h1>Memorias que nunca ocurrieron</h1>
+      <p class="subtitle">Album digital de recuerdos emocionalmente plausibles: infancia, viaje, graduacion, navidad y concierto. Todas las escenas son simuladas como si fueran archivo personal.</p>
+    </section>
+    <section class="memory-grid">
+      <article class="memory card memory-item" style="--r:-2deg" data-memory-title="Navidad en familia, 2014" data-memory-story="La imagen parece familiar porque usa codigos de album domestico: luz calida, mesa central y abrazos. Ninguna persona en la foto pertenece a una familia real del grupo." data-memory-img="https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo de navidad"><h4>Navidad en familia, 2014</h4><p>Una mesa encendida por velas y risas que nunca estuvieron ahi.</p></article>
+      <article class="memory card memory-item" style="--r:1.4deg" data-memory-title="Viaje de infancia al mar" data-memory-story="Se construyo nostalgia con granulado, encuadre imperfecto y color envejecido. La escena no documenta un viaje real, sino una memoria diseñada para parecer vivida." data-memory-img="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo de playa"><h4>Viaje de infancia al mar</h4><p>Arena en los zapatos y foto de album creada por modelo generativo.</p></article>
+      <article class="memory card memory-item" style="--r:-1.3deg" data-memory-title="Graduacion inolvidable" data-memory-story="El simulacro usa toga, confeti y abrazo frontal para activar codigos de exito. Es convincente porque imita eventos tipicos, no porque sea verdadero." data-memory-img="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo de graduacion"><h4>Graduacion inolvidable</h4><p>Abrazo perfecto, luz perfecta, instante inexistente.</p></article>
+      <article class="memory card memory-item" style="--r:1deg" data-memory-title="Concierto de madrugada" data-memory-story="El fondo oscuro y las luces de escenario generan una emocion colectiva inmediata. No hubo concierto real: se sintetizo una atmósfera emocional." data-memory-img="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo de concierto"><h4>Concierto de madrugada</h4><p>La emoción se recuerda aunque el hecho no haya ocurrido.</p></article>
+      <article class="memory card memory-item" style="--r:-1deg" data-memory-title="Paseo nocturno" data-memory-story="La escena utiliza ciudad desenfocada y profundidad de campo para sugerir intimidad. El recuerdo es verosimil, pero no tiene referente biografico." data-memory-img="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo nocturno"><h4>Paseo nocturno</h4><p>Nostalgia producida por color grading y narrativa.</p></article>
+      <article class="memory card memory-item" style="--r:2deg" data-memory-title="Cumpleaños 18" data-memory-story="Velas, gesto de sorpresa y encuadre centrado reproducen la estetica clasica de celebracion personal. Es una memoria fabricada." data-memory-img="https://images.unsplash.com/photo-1464349153735-7db50ed83c84?auto=format&fit=crop&w=1200&q=80"><img class="shot" alt="Recuerdo de cumpleaños"><h4>Cumpleaños 18</h4><p>Torta, abrazos y lágrimas ensambladas sintéticamente.</p></article>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3>Revelacion</h3>
+      <p>Ninguna escena proviene de una vivencia real del grupo. El archivo demuestra que la memoria puede convertirse en un producto visual con carga afectiva aun sin referente histórico.</p>
+    </section>
+  </main>
+  <div id="memory-modal" class="ig-modal hidden">
+    <div class="ig-modal-card">
+      <button id="close-memory-modal" class="btn ghost" type="button">Cerrar</button>
+      <div class="ig-modal-grid">
+        <img id="memory-modal-image" alt="Recuerdo ampliado">
+        <div>
+          <h3 id="memory-modal-title"></h3>
+          <p id="memory-modal-story" class="muted"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
