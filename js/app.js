@@ -3,6 +3,32 @@ const APP_KEYS = {
   ig: "simulacroIGState",
   news: "simulacroNewsState",
 };
+const NEWS_DECK_SIZE = 15;
+const NEWS_REAL_IN_DECK = 8;
+const NEWS_FAKE_IN_DECK = 7;
+const NEWS_FEEDBACK = {
+  fully_true: {
+    headline: "La noticia ocurrió realmente y la información es correcta.",
+    hint: "El referente existe y la formulación coincide con fuentes verificables.",
+  },
+  altered: {
+    headline: "Esta noticia sí ocurrió, pero el hecho mostrado fue alterado.",
+    hint: "Hay un evento real detrás, pero el titular distorsiona lo que pasó.",
+  },
+  misleading: {
+    headline:
+      "La noticia está basada en un evento real, pero la información presentada es engañosa.",
+    hint: "La trama apela a algo conocido para hacer creíble un relato incompleto.",
+  },
+  manipulated: {
+    headline: "El evento existió, pero los datos fueron manipulados.",
+    hint: "Cifras, citas o contexto fueron ajustados para empujar una lectura falsa.",
+  },
+  fully_false: {
+    headline: "Esta noticia es completamente falsa.",
+    hint: "No hay respaldo verificable: el simulacro fabrica credibilidad sin referente.",
+  },
+};
 const modalState = { list: [], idx: 0, profile: null };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -66,16 +92,19 @@ function getStore() {
 }
 const store = getStore();
 
-function initAuth() {
-  const current = window.location.pathname.split("/").pop() || "index.html";
-  const isPublic = current === "index.html" || current === "login.html";
-  const auth = store.get(APP_KEYS.auth);
-  if (!auth && !isPublic) {
-    window.location.href = "login.html";
-    return;
+function ensureGuestSession() {
+  let auth = store.get(APP_KEYS.auth);
+  if (!auth) {
+    auth = { username: "Invitado", guest: true, ts: Date.now() };
+    store.set(APP_KEYS.auth, auth);
   }
+  return auth;
+}
+
+function initAuth() {
+  const auth = ensureGuestSession();
   const nav = document.querySelector(".nav");
-  if (!nav || !auth) return;
+  if (!nav || auth.guest) return;
   const logout = document.createElement("button");
   logout.type = "button";
   logout.className = "btn ghost";
@@ -84,7 +113,8 @@ function initAuth() {
   logout.textContent = "Cerrar sesion";
   logout.addEventListener("click", () => {
     store.remove(APP_KEYS.auth);
-    window.location.href = "login.html";
+    ensureGuestSession();
+    window.location.href = "index.html";
   });
   nav.appendChild(logout);
 }
@@ -97,7 +127,7 @@ function initLogin() {
     const userInput = form.querySelector("input");
     const username =
       userInput && userInput.value ? userInput.value.trim() : "usuario";
-    store.set(APP_KEYS.auth, { username, ts: Date.now() });
+    store.set(APP_KEYS.auth, { username, guest: false, ts: Date.now() });
     const btn = form.querySelector("button");
     btn.disabled = true;
     btn.textContent = "Validando sesion...";
@@ -215,7 +245,23 @@ function initVoting() {
     if (d.get("q3") === "si") score++;
     if (d.get("q4") === "no") score++;
     output.classList.remove("hidden");
-    output.innerHTML = `<strong>Resultado conceptual:</strong> ${score}/4.`;
+    const lines = [
+      d.get("q1") === "hiperreal"
+        ? "Autenticidad: te inclinas por el perfil hiperproducido."
+        : "Autenticidad: te inclinas por el perfil más cotidiano.",
+      d.get("q2") === "si"
+        ? "Memorias: varias escenas te parecieron creíbles como recuerdo colectivo."
+        : "Memorias: detectaste artificio o algo que no encajaba.",
+      d.get("q3") === "si"
+        ? "Redes: confiarías en la imagen como evidencia en tu feed."
+        : "Redes: cuestionarías la imagen o buscarías otra fuente.",
+      d.get("q4") === "no"
+        ? "Emoción: puedes emocionarte aunque el hecho no sea totalmente verdadero."
+        : "Emoción: para ti, la emoción exige que el hecho haya ocurrido tal cual.",
+    ];
+    output.innerHTML =
+      `<strong>Tu registro:</strong> ${score}/4 respuestas coinciden con la hipótesis del proyecto.<br>` +
+      `<span class="muted" style="display:block;margin-top:8px">${lines.join("<br>")}</span>`;
   });
 }
 
@@ -528,6 +574,91 @@ function renderFollowers(state) {
   });
 }
 
+function buildNewsDetail(item) {
+  if (item.detail) return item.detail;
+  const kind =
+    item.feedbackKind || (item.status ? "fully_true" : "fully_false");
+  const section = item.section || "medios digitales";
+  const source = item.source || "fuente no verificada";
+  switch (kind) {
+    case "fully_true":
+      return (
+        `<strong>Qué pasó:</strong> ${item.copy}<br>` +
+        `<strong>Por qué es confiable:</strong> ${item.why} Puedes contrastarlo con ${source}.<br>` +
+        `<strong>Clave en ${section}:</strong> aquí el referente existe; el reto es no confundir formato convincente con verificación.`
+      );
+    case "altered":
+      return (
+        `<strong>Qué hay de real:</strong> en ${section} sí circulan debates o avances parecidos, pero no en la forma del titular.<br>` +
+        `<strong>Cómo se alteró:</strong> se cambió alcance (de rumor a “ya está en producción”), se mezcló experimento con adopción masiva o se añadió un detalle clave sin respaldo: “${item.copy}”.<br>` +
+        `<strong>Verificación:</strong> ${item.why} La fuente ${source} no sustenta la versión publicada.`
+      );
+    case "misleading":
+      return (
+        `<strong>Base real:</strong> el titular apela a algo plausible en ${section} (tendencia, tecnología o miedo social conocido).<br>` +
+        `<strong>Por qué engaña:</strong> omite contexto, salta de un caso aislado a “todos lo hacen” o presenta correlación como causalidad. ${item.copy}<br>` +
+        `<strong>Detalle:</strong> ${item.why}`
+      );
+    case "manipulated":
+      return (
+        `<strong>Evento de fondo:</strong> ${item.copy}<br>` +
+        `<strong>Manipulación:</strong> se retocaron cifras, citas, capturas o testimonios para forzar una lectura. La fuente ${source} no confirma la versión viral.<br>` +
+        `<strong>Verificación:</strong> ${item.why}`
+      );
+    default:
+      return (
+        `<strong>Qué afirma el titular:</strong> ${item.copy}<br>` +
+        `<strong>Por qué es falsa:</strong> ${item.why} No hay respaldo en ${source}.<br>` +
+        `<strong>Truco del simulacro:</strong> imita tono periodístico y autoridad visual para que el vacío de referente pase desapercibido.`
+      );
+  }
+}
+
+function getNewsFeedbackHtml(item, correct) {
+  const kind =
+    item.feedbackKind || (item.status ? "fully_true" : "fully_false");
+  const copy = NEWS_FEEDBACK[kind] || NEWS_FEEDBACK.fully_false;
+  const verdict = correct
+    ? "Tu respuesta es correcta."
+    : "Tu respuesta es incorrecta.";
+  return (
+    `<strong>${copy.headline}</strong><br>` +
+    `<span class="news-verdict ${correct ? "news-verdict-ok" : "news-verdict-bad"}">${verdict}</span><br>` +
+    `<span class="muted">${copy.hint}</span><br>` +
+    `<span class="news-feedback-detail muted">${buildNewsDetail(item)}</span>`
+  );
+}
+
+function buildMemoryRevealHtml(memories, correct, total, confAvg) {
+  const real = memories.filter((m) => m.status);
+  const fake = memories.filter((m) => !m.status);
+  const pct = Math.round((correct / total) * 100);
+  const realList = real
+    .map(
+      (m) =>
+        `<li><strong>${m.date} · ${m.title}</strong><br><span class="muted">${m.revealNote || m.text}</span></li>`,
+    )
+    .join("");
+  const fakeList = fake
+    .map(
+      (m) =>
+        `<li><strong>${m.date} · ${m.title}</strong><br><span class="muted">${m.revealNote || m.text}</span></li>`,
+    )
+    .join("");
+  return (
+    `<div class="reveal-overlay">` +
+    `<strong>Tu lectura: ${correct}/${total} aciertos (${pct}%). Confianza promedio: ${confAvg}%.</strong>` +
+    `<p class="muted" style="margin-top:10px">Estas tarjetas no son recuerdos privados del grupo. Son <strong>memorias culturales digitales</strong>: escenas que muchas personas vimos en redes, noticias o tendencias (pandemia, mundiales, filtros, IA). La mente las mezcla con lo vivido y a veces sentimos que “estuvimos ahí” aunque solo las consumimos en pantalla.</p>` +
+    `<h4 style="margin-top:14px;font-size:1rem">Sí ocurrieron (${real.length})</h4>` +
+    `<ul class="memory-reveal-list">${realList}</ul>` +
+    `<h4 style="margin-top:14px;font-size:1rem">No ocurrieron como se plantean (${fake.length})</h4>` +
+    `<ul class="memory-reveal-list">${fakeList}</ul>` +
+    `<p style="margin-top:14px"><em>“La imagen ya no documenta la realidad. La produce.”</em><br>` +
+    `<em>“¿Cuántas de tus memorias vienen de experiencias propias… y cuántas de lo que internet te hizo sentir que viviste?”</em></p>` +
+    `</div>`
+  );
+}
+
 function initNewsLab() {
   const lab = document.getElementById("news-lab");
   if (!lab) return;
@@ -538,7 +669,7 @@ function initNewsLab() {
   const progressBar = document.getElementById("news-progress-bar");
   const progressText = document.getElementById("news-progress-text");
   const state = store.get(APP_KEYS.news) || {
-    total: 20,
+    total: NEWS_DECK_SIZE,
     score: 0,
     confidence: [],
     fooledBy: {},
@@ -555,12 +686,13 @@ function initNewsLab() {
   const buildBalancedDeck = () => {
     const realItems = shuffleArray(
       bank.filter((item) => item.status === true),
-    ).slice(0, 10);
+    ).slice(0, NEWS_REAL_IN_DECK);
     const fakeItems = shuffleArray(
       bank.filter((item) => item.status === false),
-    ).slice(0, 10);
+    ).slice(0, NEWS_FAKE_IN_DECK);
     const combined = [...realItems, ...fakeItems];
-    if (combined.length < 20) return shuffleArray(bank).slice(0, 20);
+    if (combined.length < NEWS_DECK_SIZE)
+      return shuffleArray(bank).slice(0, NEWS_DECK_SIZE);
     return shuffleArray(combined);
   };
   if (!bank.length) {
@@ -568,9 +700,14 @@ function initNewsLab() {
       "<p class='muted'>No se pudo cargar el laboratorio de noticias.</p>";
     return;
   }
-  if (!Array.isArray(state.deck) || !state.deck.length) {
+  const deckOutdated =
+    !Array.isArray(state.deck) ||
+    !state.deck.length ||
+    state.total !== NEWS_DECK_SIZE ||
+    state.deck.length !== NEWS_DECK_SIZE;
+  if (deckOutdated) {
     state.deck = buildBalancedDeck();
-    state.total = 20;
+    state.total = NEWS_DECK_SIZE;
     state.score = 0;
     state.confidence = [];
     state.fooledBy = {};
@@ -596,7 +733,7 @@ function initNewsLab() {
     if (nextBtn) nextBtn.classList.add("hidden");
     if (restartBtn) restartBtn.classList.remove("hidden");
     lab.innerHTML = "";
-    hud.textContent = `Laboratorio activo · 20 noticias mezcladas · Aciertos ${state.score}`;
+    hud.textContent = `Laboratorio activo · ${state.total} noticias mezcladas · Aciertos ${state.score}`;
     updateProgress();
     state.deck.forEach((item, idx) => {
       const cardKey = `${idx}-${item.title}`;
@@ -647,9 +784,8 @@ function initNewsLab() {
           card.style.boxShadow = correct
             ? "0 0 0 1px rgba(72, 255, 152, 0.7), 0 0 36px rgba(72, 255, 152, 0.35)"
             : "0 0 0 1px rgba(255, 87, 122, 0.8), 0 0 32px rgba(255, 87, 122, 0.4)";
-          feedback.innerHTML = correct
-            ? `<strong>Esta noticia ocurrió realmente.</strong> La realidad todavía existe... aunque cada vez sea más difícil reconocerla.<br><span class="muted">${item.why}</span>`
-            : `<strong>Esta noticia nunca ocurrió.</strong> El simulacro no imita la realidad. La reemplaza.<br><span class="muted">${item.why}</span>`;
+          feedback.innerHTML = getNewsFeedbackHtml(item, correct);
+          feedback.classList.add("news-feedback-rich");
           card
             .querySelectorAll("[data-answer]")
             .forEach((b) => (b.disabled = true));
@@ -684,9 +820,8 @@ function initNewsLab() {
         card
           .querySelectorAll("[data-answer]")
           .forEach((b) => (b.disabled = true));
-        feedback.textContent = wasCorrect
-          ? "Respuesta guardada: correcta."
-          : "Respuesta guardada: incorrecta.";
+        feedback.innerHTML = getNewsFeedbackHtml(item, wasCorrect);
+        feedback.classList.add("news-feedback-rich");
       }
       lab.appendChild(card);
     });
@@ -712,6 +847,7 @@ function initNewsLab() {
   if (nextBtn) nextBtn.addEventListener("click", () => render());
   restartBtn.addEventListener("click", () => {
     state.deck = buildBalancedDeck();
+    state.total = NEWS_DECK_SIZE;
     state.score = 0;
     state.confidence = [];
     state.fooledBy = {};
@@ -723,7 +859,24 @@ function initNewsLab() {
 }
 
 function buildNewsRounds() {
-  return [
+  let falseKindIndex = 0;
+  const falseKinds = [
+    "fully_false",
+    "altered",
+    "misleading",
+    "manipulated",
+  ];
+  const withFeedbackKinds = (rounds) =>
+    rounds.map((section) => ({
+      ...section,
+      items: section.items.map((item) => ({
+        ...item,
+        feedbackKind: item.status
+          ? "fully_true"
+          : falseKinds[falseKindIndex++ % falseKinds.length],
+      })),
+    }));
+  return withFeedbackKinds([
     {
       section: "Tecnologia y redes",
       items: [
@@ -1113,7 +1266,7 @@ function buildNewsRounds() {
         },
       ],
     },
-  ];
+  ]);
 }
 
 function initMemoryAlbum() {
@@ -1210,32 +1363,34 @@ function initMemoryAlbum() {
   }
   const revealBtn = document.getElementById("memory-reveal-action");
   const revealText = document.getElementById("memory-reveal-text");
+  const memoryByTitle = Object.fromEntries(memories.map((m) => [m.title, m]));
   revealBtn.onclick = () => {
     let correct = 0;
     let confidenceTotal = 0;
     document.querySelectorAll(".memory-item").forEach((card) => {
+      const title = card.dataset.memoryTitle;
+      const m = memoryByTitle[title];
       const real = card.dataset.status === "true";
-      const guess = state.answers[card.dataset.memoryTitle] === "real";
+      const guess = state.answers[title] === "real";
       const ok = real === guess;
       if (ok) correct += 1;
-      confidenceTotal += Number(
-        state.confidence[card.dataset.memoryTitle] || 50,
-      );
+      confidenceTotal += Number(state.confidence[title] || 50);
       card.classList.add(real ? "revealed-true" : "revealed-false");
+      const fb = card.querySelector(".memory-feedback");
+      if (fb && m) {
+        fb.innerHTML = `<strong>${real ? "Sí ocurrió" : "No ocurrió como se plantea"}</strong><br><span class="muted">${m.revealNote || m.text}</span>`;
+      }
     });
     state.revealed = true;
     store.set("memoryArchiveState", state);
     const total = memories.length;
-    const pct = Math.round((correct / total) * 100);
     const confAvg = Math.round(confidenceTotal / total);
-    revealText.innerHTML = `
-      <div class="reveal-overlay">
-        <strong>Algunas de estas memorias nunca ocurrieron.</strong><br>
-        Aciertos: ${correct}/${total} (${pct}%). Confianza promedio: ${confAvg}%.<br><br>
-        "La imagen ya no documenta la realidad. La produce."<br>
-        "¿Cuántas de tus memorias vienen realmente de experiencias... y cuántas vienen de internet?"
-      </div>
-    `;
+    revealText.innerHTML = buildMemoryRevealHtml(
+      memories,
+      correct,
+      total,
+      confAvg,
+    );
   };
 
   function maybeEnableReveal() {
@@ -1255,8 +1410,51 @@ function initMemoryAlbum() {
     });
 }
 
+const MEMORY_REVEAL_NOTES = {
+  "Las calles vacías durante la pandemia":
+    "Sí ocurrió: desde marzo de 2020 hubo confinamientos globales, calles vacías y vida migrada a pantallas. Fue uno de los eventos más documentados del siglo XXI.",
+  "El apagón mundial de TikTok":
+    "No ocurrió así: TikTok ha tenido caídas puntuales en regiones, pero no un apagón mundial de 48 horas. Es un falso recuerdo colectivo alimentado por capturas y rumores.",
+  "La final del Mundial 2022":
+    "Sí ocurrió: la final Argentina–Francia fue el 18 de diciembre de 2022 en Catar, vista por cientos de millones en streaming y redes.",
+  "El festival de drones de Bogotá":
+    "No ocurrió: no hubo un festival masivo de drones en Bogotá como se describe. La imagen evoca espectáculos tecnológicos vistos en otras ciudades, no un hecho local verificable.",
+  "El auge de las videollamadas":
+    "Sí ocurrió: entre 2020 y 2022 Zoom, Meet y Teams reemplazaron oficinas, clases y reuniones familiares para millones de personas.",
+  "La influencer desaparecida durante un live":
+    "No ocurrió: es narrativa de creepypasta digital. Los lives con glitches existen, pero no hay caso verificado de una influencer que desapareciera en directo de esa forma.",
+  "El boom de los filtros faciales":
+    "Sí ocurrió: desde 2020–2021 creció el uso de filtros AR en Instagram, Snapchat y TikTok, con debates sobre autoestima y comparación corporal.",
+  "La red social RememberMe":
+    "No ocurrió: no existió una plataforma masiva con ese nombre. Mezcla la idea de apps reales de restauración con IA y la fantasía de un archivo emocional global.",
+  "El crecimiento de influencers virtuales":
+    "Sí ocurrió: VTubers y avatares de marca (p. ej. Lil Miquela, personajes de campañas) ganaron visibilidad entre 2020 y 2024.",
+  "El concierto holográfico perdido":
+    "No ocurrió: hubo conciertos híbridos y hologramas puntuales, pero no un evento global “perdido” que millones vieran y luego desapareciera sin rastro.",
+  "El aumento masivo de filtros en videollamadas":
+    "Sí ocurrió: en 2023–2024 muchas personas usaron filtros incluso en trabajo y estudio remoto, no solo en redes personales.",
+  "La cafetería viral construida solo para Instagram":
+    "Parcialmente inventado: sí existen locales “instagrammables”, pero este caso específico es una escena genérica, no un café documentado con ese nombre.",
+  "El crecimiento de los deepfakes":
+    "Sí ocurrió: desde 2022–2024 aumentaron videos y audios sintéticos en política, famosos y estafas, alertando a verificadores de medios.",
+  "El reality show protagonizado por IA":
+    "No ocurrió: hay experimentos y cortos con IA, pero no un reality masivo en prime time donde todos los concursantes fueran generados sin aviso al público.",
+  "La explosión de contenido 'día en mi vida'":
+    "Sí ocurrió: el formato vlog cotidiano se volvió estándar en TikTok y YouTube entre 2022 y 2024, con rutinas hipereditadas.",
+  "El museo de recuerdos artificiales":
+    "No ocurrió: hay exposiciones sobre IA y memoria, pero no un museo permanente con ese nombre que recorriera memorias 100 % fabricadas.",
+  "El uso de IA para restaurar fotografías antiguas":
+    "Sí ocurrió: herramientas como MyHeritage, Remini y modelos generativos popularizaron colorear y reconstruir fotos familiares desde 2022.",
+  "La tendencia de alquilar familias falsas para redes sociales":
+    "Exagerado / no masivo: circulan anécdotas y sátiras, pero no hay evidencia de una tendencia global y sostenida de “alquilar familias” para posts.",
+  "El crecimiento de asistentes virtuales emocionales":
+    "Sí ocurrió: ChatGPT, Replika y asistentes de voz generaron debates sobre apego, soledad y límites afectivos desde 2023.",
+  "El archivo perdido del internet emocional":
+    "No ocurrió: es leyenda digital. Mezcla foros antiguos, nostalgia por la web 1.0 y miedo a que la memoria colectiva esté en servidores opacos.",
+};
+
 function getMemoryDataset() {
-  return [
+  const items = [
     {
       date: "Marzo 2020",
       title: "Las calles vacías durante la pandemia",
@@ -1418,6 +1616,10 @@ function getMemoryDataset() {
         "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=1200",
     },
   ];
+  return items.map((m) => ({
+    ...m,
+    revealNote: MEMORY_REVEAL_NOTES[m.title] || m.text,
+  }));
 }
 
 function openMemoryModal(item) {
@@ -1450,14 +1652,17 @@ function initJuryPanel() {
       shares: {},
       saves: {},
     };
-    const news = store.get(APP_KEYS.news) || { round: 1, total: 10, score: 0 };
+    const news = store.get(APP_KEYS.news) || {
+      total: NEWS_DECK_SIZE,
+      score: 0,
+    };
     const commentsCount = Object.values(ig.comments || {}).reduce(
       (acc, arr) => acc + arr.length,
       0,
     );
     summary.value = `Informe jurado - Cultura y Simulacro
 Usuario: ${auth.username}
-Rondas: ${news.round}/${news.total}
+Noticias respondidas: ${Object.keys(news.answered || {}).length}/${news.total}
 Aciertos: ${news.score}/${news.total}
 Followers Laura Cepeda: ${ig.followers.modelo}
 Followers Kimberly Loaiza: ${ig.followers.feminista}

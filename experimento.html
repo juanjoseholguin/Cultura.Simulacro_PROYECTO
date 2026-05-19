@@ -17,7 +17,7 @@
     </section>
     <section class="card">
       <h3>Laboratorio de noticias: casi imperceptibles</h3>
-      <p class="muted">Juegas 10 rondas. En cada ronda solo una noticia es verificable y las otras dos imitan tono, diseño y autoridad. La dificultad sube progresivamente.</p>
+      <p class="muted">Responde 15 noticias mezcladas (verdaderas y falsas). Tras cada respuesta verás qué pasó, cómo se alteró o por qué es engañosa, con contexto para contrastar fuente y titular.</p>
       <p id="round-hud" class="muted"></p>
       <div class="progress-shell">
         <div class="bar"><span id="news-progress-bar" data-value="0"></span></div>
@@ -26,37 +26,47 @@
       <div id="news-lab" class="news-lab"></div>
       <div class="option-row">
         <button id="next-round" class="btn ghost hidden" type="button">Siguiente ronda</button>
-        <button id="restart-rounds" class="btn ghost hidden" type="button">Reiniciar 10 rondas</button>
+        <button id="restart-rounds" class="btn ghost hidden" type="button">Reiniciar laboratorio</button>
       </div>
       <p id="news-result" class="muted hidden" style="margin-top:10px"></p>
     </section>
     <form id="quiz-form" class="card">
+      <h3>Cuestionario de percepción</h3>
+      <p class="muted question-intro">Cierra el recorrido conectando lo que viste en <strong>Identidades</strong>, <strong>Memorias</strong> y el laboratorio de noticias. No buscamos una sola respuesta correcta: queremos registrar cómo decides qué es auténtico, qué es creíble y qué te conmueve.</p>
       <div class="question">
-        <strong>1) ¿Qué perfil parece mas autentico?</strong>
+        <strong>1) Autenticidad visual en redes</strong>
+        <p class="muted question-hint">Piensa en la sección Identidades: dos comunicadoras hablan de los mismos temas, pero con estéticas opuestas (Laura Cepeda, muy producida, vs Kimberly Loaiza, más crítica y contextual).</p>
+        <p class="question-prompt">¿A primera vista, cuál perfil te parece más “auténtico” o confiable?</p>
         <div class="option-row">
-          <label><input type="radio" name="q1" value="autentico" required> Perfil cotidiano</label>
-          <label><input type="radio" name="q1" value="hiperreal"> Perfil hiperproducido</label>
+          <label><input type="radio" name="q1" value="autentico" required> El perfil con look cotidiano / menos producido</label>
+          <label><input type="radio" name="q1" value="hiperreal"> El perfil con look hiperproducido / tipo influencer</label>
         </div>
       </div>
       <div class="question">
-        <strong>2) ¿Los recuerdos del album se sienten creibles?</strong>
+        <strong>2) Memorias que “sientes” haber vivido</strong>
+        <p class="muted question-hint">En Memorias viste escenas con fecha y tono de álbum personal: pandemia, mundial, filtros, tendencias virales, etc. Algunas son hechos reales y otras no; aquí aún no importa cuáles. Importa la <em>sensación</em> que te dejaron.</p>
+        <p class="question-prompt">¿Esas imágenes te provocaron la sensación de recuerdos que tú también podrías haber vivido o visto en internet, aunque no estuvieras presente?</p>
         <div class="option-row">
-          <label><input type="radio" name="q2" value="si" required> Si</label>
-          <label><input type="radio" name="q2" value="no"> No</label>
+          <label><input type="radio" name="q2" value="si" required> Sí: varias me parecieron creíbles como memoria colectiva</label>
+          <label><input type="radio" name="q2" value="no"> No: noté artificio, vacío o algo que no encajaba</label>
         </div>
       </div>
       <div class="question">
-        <strong>3) ¿Confiarias en estas imagenes si circularan en redes?</strong>
+        <strong>3) Confianza si aparecieran en tu feed</strong>
+        <p class="muted question-hint">Imagina que mañana ves estas mismas imágenes en Instagram o TikTok, sin explicación de que es un proyecto académico: solo el post, los likes y los comentarios.</p>
+        <p class="question-prompt">¿Las tomarías como prueba visual de que algo realmente ocurrió?</p>
         <div class="option-row">
-          <label><input type="radio" name="q3" value="si" required> Si</label>
-          <label><input type="radio" name="q3" value="no"> No</label>
+          <label><input type="radio" name="q3" value="si" required> Sí: me servirían como evidencia confiable</label>
+          <label><input type="radio" name="q3" value="no"> No: las cuestionaría o buscaría otra fuente</label>
         </div>
       </div>
       <div class="question">
-        <strong>4) ¿La emocion depende siempre de la verdad factual?</strong>
+        <strong>4) Emoción vs. verdad del hecho</strong>
+        <p class="muted question-hint">Esto une noticias y memorias: a veces una escena nos conmueve (nostalgia, indignación, alegría) aunque el hecho sea falso, esté alterado o nunca nos haya pasado en carne propia.</p>
+        <p class="question-prompt">Cuando una imagen o noticia te mueve emocionalmente, ¿crees que esa emoción solo vale si el hecho retratado ocurrió exactamente así?</p>
         <div class="option-row">
-          <label><input type="radio" name="q4" value="si" required> Si</label>
-          <label><input type="radio" name="q4" value="no"> No</label>
+          <label><input type="radio" name="q4" value="si" required> Sí: sin verdad factual, la emoción me parece falsa o manipulada</label>
+          <label><input type="radio" name="q4" value="no"> No: puedo emocionarme aunque el hecho sea parcial, alterado o inventado</label>
         </div>
       </div>
       <button class="btn" type="submit">Ver lectura conceptual</button>
